@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emberek</title>
+    <style>
+        body {
+            background-color: lightblue;
+        }
+
+        #kozep {
+            width: 80%;
+            margin: 0px auto;
+        }
+        #adat {
+            background-color: white;
+            border: 1px solid black;
+            padding: 10px;
+        }
+
+        #v1, #v2 {
+            display: inline-block;
+            width: 49%;
+        }
+
+        #v2 {
+            text-align: right;
+        }
+    </style>
+    <script>
+        let currentId;
+        async function adatKer(id) {
+            if (document.getElementById("cb").checked) {
+                const response = await fetch("http://localhost:88/row?id=" + id);
+                const json = await response.json();
+                document.getElementById("adat").innerHTML = json.row;
+            } else {
+                const response = await fetch("http://localhost:88/obj?id=" + id);
+                const ember = await response.json();
+                document.getElementById("adat").innerHTML = `
+                    Id: ${ember.id}<br>
+                    First name: ${ember.first}<br>
+                    Last name: ${ember.last}<br>
+                    Sex: ${ember.sex}<br>
+                    Email: ${ember.email}<br>
+                    Date of birth: ${ember.birth}<br>
+                    Job: ${ember.job}<br>
+                `
+            }
+            currentId = id;
+            console.log(currentId)
+        }
+
+        function elozo() {
+            if (currentId > 1) adatKer(currentId-1);
+        }
+
+        
+        async function kovetkezo() {
+            const response = await fetch("http://localhost:88/len");
+            const json = await response.json();
+            if (currentId < json-1) adatKer(currentId+1);
+        }
+
+        function elso() {
+            adatKer(1);
+        }
+
+        async function utolso() {
+            const response = await fetch("http://localhost:88/len");
+            const json = await response.json();
+            adatKer(json-1);
+        }
+
+        async function kereses() {
+            let first = document.getElementById("first").value;
+            let response = await fetch("http://localhost:88/name?first=" + first);
+            let json = await response.json();
+            let html = "";
+            for (sor of json) html += sor + "<br>";
+            document.getElementById("adat").innerHTML = html;
+        }
+    </script>
+</head>
+<body onload="adatKer(17);">
+    <div id="kozep">
+        <div id="adat">?</div>
+        <div id="v1">
+            <input type="button" value="Előző" onclick="elozo();">
+            <input type="button" value="Következő" onclick="kovetkezo();">
+        </div>
+        <div id="v2">
+            <input type="button" value="Első" onclick="elso();">
+            <input type="button" value="Utolsó" onclick="utolso();">
+        </div>
+        <input type="checkbox" id="cb" checked onclick="adatKer(currentId);"> Nyers adat
+        <br>
+        <input type="text" value="Ryan" id="first">
+        <input type="button" value="Keresés" onclick="kereses();">
+    </div>
+</body>
+</html>
